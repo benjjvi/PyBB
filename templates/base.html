@@ -1,0 +1,22 @@
+{# templates/base.html #}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{% block title %}{{ title }}{% endblock title %}</title>
+</head>
+
+<body>  
+    <header>
+        {% include "_navigation.html" %}
+    </header>
+    {% block content %}
+        <h1>Welcome to the {{ title }} bulletin board!</h1>
+        {% if title == "default Jinja and Flask" %}
+            <h2>Do not deploy this server! Read the <a href="{{ url_for('static', filename='docs/docs.html')}}">docs</a> on how to configure.</h2>
+        {% endif %}
+    {% endblock content %}
+</body>
+</html>

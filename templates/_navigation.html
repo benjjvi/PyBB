@@ -1,0 +1,11 @@
+{# templates/_navigation.html #}
+
+<nav>
+    <div class="container">
+        <section>
+            {% for menu_item in ["home", "results"] %}
+            <a  href="{{ url_for(menu_item) }}">{{ menu_item.title() }}</a>
+            {% endfor %}
+        </section>
+    </div>
+</nav>
