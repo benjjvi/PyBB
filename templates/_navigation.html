@@ -1,11 +1,14 @@
 {# templates/_navigation.html #}
+<header>
+    <nav>
+        <div class="container">
+            <section>
+                {% for menu_item in ["home", "results"] %}
+                <a  href="{{ url_for(menu_item) }}">{{ menu_item.title() }}</a>
+                {% endfor %}
+            </section>
+        </div>
+    </nav>
+</header>
 
-<nav>
-    <div class="container">
-        <section>
-            {% for menu_item in ["home", "results"] %}
-            <a  href="{{ url_for(menu_item) }}">{{ menu_item.title() }}</a>
-            {% endfor %}
-        </section>
-    </div>
-</nav>
+<div class="banner"></div>

@@ -10,14 +10,31 @@ nav {
 nav .container {
     height: calc(3em + 4px);
 }
+
 nav .container section {
     padding: calc(1em + 2px);
     width: 100vw;
 }
+
 nav .container section a {
     border: solid 1px transparent;
     padding: 1em;
 }
+
+.banner_image {
+    width: 100vw;
+    height: 250px;
+    object-fit: cover;
+}
+
+.banner {
+    width: 94.95%;
+    height: 200px;        
+    background: url("images/banner.jpg") no-repeat;
+    background-size: cover;
+    padding: 20px 2vw 20px;
+}
+
 p {
     margin: 1em;
 }
