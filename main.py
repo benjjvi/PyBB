@@ -73,7 +73,7 @@ def boardView():
 @app.route("/post")
 def postView():
     # Get the post ID from the URL:
-    postID = request.args.get('post', default = 1, type = int)
+    postID = request.args.get('postid', default = 1, type = int)
 
     # Get the post information:
     postInfo = Database.get_post_info(postID)
