@@ -4,3 +4,4 @@ reset.sh
 pybb.conf
 .DS_Store
 db/*.db3
+playground.py
