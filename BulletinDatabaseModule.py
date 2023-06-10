@@ -195,6 +195,7 @@ class Configure:
     
     def create_database_files(self):
         import os
+        os.system("mkdir db")
         os.system("echo >> ./db/bb.db3") # echo >> to be OS agnostic
         del os # try and increase security in program. if os is only available for milliseconds during the setup process alone,
             #     security of program is massively increased
@@ -203,7 +204,7 @@ class Configure:
 
     def create_tables(self):
         for db in ["users", "log", "boards", "posts", "comments"]:
-            tmp_conn  = sqlite3.connect(f'db/bb.db3')
+            tmp_conn  = sqlite3.connect('db/bb.db3')
 
             c = tmp_conn.cursor()
 
