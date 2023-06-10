@@ -1,0 +1,17 @@
+{# templates/board.html #}
+
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Welcome to {{ title }}!</h1>
+<h2>{{ description }}</h2>
+
+{% for board in boards %}
+<div class="boardShowcase"></div>
+    <a href="board?board={{ board[0] }}">{{ board[1] }}</a>
+    <br>
+    <p>{{ board[2] }}</p>
+</div>
+{% endfor %}
+
+{% endblock content %}
