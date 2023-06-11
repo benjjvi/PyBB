@@ -43,6 +43,21 @@ class DB:
         db.close()
 
         return board
+    
+    def get_user_info(self, userid):
+        db = self.connect()
+        c = db.cursor()
+        c.execute(f"select * from users where userid = '{userid}'")
+
+        user = c.fetchone()
+
+        # Close cursor.
+        c.close()
+
+        # Close connection.
+        db.close()
+
+        return user
 
     def get_posts_from_board(self, boardid):
         db = self.connect()
@@ -197,6 +212,7 @@ class Configure:
             self.conf = ast.literal_eval(conf)
             f.close()
         except Exception as e:
+            print(e)
             self.reset_database()
             self.__init__()
 
@@ -236,7 +252,7 @@ class Configure:
                 # Create table
                 c.execute(
                     f"""create table {db}
-                (userid integer, username text, hashedpassword text, email text, datejoined integer, locked integer)"""
+                (userid integer, username text, hashedpassword text, email text, userabout1 string, userabout2 string, datejoined integer, locked integer)"""
                 )
             elif db == "log":
                 c.execute(
@@ -275,7 +291,7 @@ class Configure:
                 # Create table
                 c.execute(
                     f"""insert into users
-                    values (0, 'admin', '{cryptography.get_hashed_password('admin').decode('utf-8')}', 'admin@pybb.net', {datetime.utcnow().strftime('%Y%m%d')}, 1)"""
+                    values (0, 'admin', '{cryptography.get_hashed_password('admin').decode('utf-8')}', 'admin@pybb.net', "About Line 1", "About Line 2", {datetime.utcnow().strftime('%Y%m%d')}, 1)"""
                 )
             elif db == "log":
                 c.execute(
@@ -317,7 +333,7 @@ if __name__ == "__main__":
         db.create_post(2, f"Test post {i}", f"Test post content {i}", 0)
 
     for i in range(1, 101):
-        for j in range(0, 10):
+        for j in range(0, 50):
             db.create_comment(i, f"Test comment {j}", 0, "admin")
     print(db.get_boards())
     print(db.get_posts_from_board(2))

@@ -1,0 +1,17 @@
+{# templates/about.html #}
+
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    <h1>About</h1>
+    {% for x in description %}
+        <p>{{ x }}</p>
+    {% endfor %}
+    <br>
+    <a href="https://scripts.sil.org/OFL">Fonts provided under the OFL license.</a>
+    <br>
+    <a href="https://github.com/benjjvi/PyBB">The PyBB software that this board runs on was created by benjjvi.</a>
+    <br>
+</div>
+{% endblock content %}

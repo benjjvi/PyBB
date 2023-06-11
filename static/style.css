@@ -1,4 +1,10 @@
+@font-face {
+    font-family: NunitoSans;
+    src: url(/static/NunitoSans.ttf);
+}
+
 body{
+    font-family: NunitoSans;
     padding: 25px 10vw 75px;
 }
 
@@ -21,12 +27,6 @@ nav .container section a {
     padding: 1em;
 }
 
-.banner_image {
-    width: 100vw;
-    height: 250px;
-    object-fit: cover;
-}
-
 .banner {
     width: 94.95%;
     height: 200px;        
@@ -35,6 +35,62 @@ nav .container section a {
     padding: 20px 2vw 20px;
 }
 
-p {
+.footer {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem;
+    background: lightgray;
+    color: black;
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+p, a {
     margin: 1em;
 }
+
+.nomargin {
+    margin: 0;
+}
+
+h1, h2, h3 {
+    margin: 0.5em;
+}
+
+/* Used for grids on posts and comments */
+
+.grid-container {
+    display: grid;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    grid-template-columns: 75fr 25fr;
+    gap: 10px;
+    background-color: #ffffff;
+    padding: 10px;
+}
+
+.grid-container > div {
+    background-color: rgba(230, 239, 244, 0.8);
+    text-align: left;
+    /* The order of padding is top, left, bottom, right. */
+    padding: 10px 15px 10px 15px;
+}
+
+/* Used for content inside grids */
+/* posttitle postcontent username userabout commentcontent commentauthor */
+
+.posttitle {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.postcontent .commentcontent .commentauthor .username .userabout {
+    font-size: 1.2em;
+}
+

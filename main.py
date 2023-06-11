@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from datetime import datetime
 
 import BulletinDatabaseModule
 
@@ -13,14 +14,25 @@ def home():
     boards = Database.get_boards()
 
     print(boards)
+    print(Config.get_config())
     # Render the home page, with the boards:
     return render_template(
         "home.html",
         title=Config.get_config()["title"],
-        description=Config.get_config()["description"],
+        description=Config.get_config()["short_description"],
         boards=boards,
     )
 
+@app.route("/about")
+def about():
+    return render_template(
+        "about.html",
+        description=Config.get_config()["long_description"].split("<br>"),
+    )
+
+@app.template_filter('date')
+def date_filter(s):
+    return datetime.utcnow().strftime('%Y')
 
 # Using args
 
@@ -98,12 +110,35 @@ def postView():
     # Get the comments from the post:
     comments = Database.get_comments_from_post(postID)
 
+    # Get the user information:
+    userInfo = Database.get_user_info(postInfo[4])
+
+
     # debugging
     print(f"postID: {postID}")
     print(f"postInfo: {postInfo}")
     print(f"comments: {comments}")
+    print(f"userInfo: {userInfo}")
 
-    return render_template("post.html", post=postInfo, comments=comments)
+    # We need to turn postInfo from a tuple to a list.
+    postInfo = list(postInfo)
+
+    # We also need to turn each comment in the array to a list from a tuple.
+    comments = [list(comment) for comment in comments]
+
+    # We can handle turning the date from &Y&M&d in the postInfo[5] into a &d &M &Y format here.
+    # We can also handle turning the date from &Y&M&d in the comments[5] into a &d &M &Y format here.
+    postInfo[5] = datetime.strptime(str(postInfo[5]), "%Y%m%d").strftime("%d %B %Y")
+    for comment in comments:
+        comment[5] = datetime.strptime(str(comment[5]), "%Y%m%d").strftime("%d %B %Y")
+
+    # We can also handle times here. Turn postInfo[6] and comments[6] into a 24 hour clock.
+    postInfo[6] = datetime.strptime(str(postInfo[6]), "%H%M%S").strftime("%H:%M UTC")
+    for comment in comments:
+        comment[6] = datetime.strptime(str(comment[6]), "%H%M%S").strftime("%H:%M UTC")
+
+
+    return render_template("post.html", user=userInfo, post=postInfo, comments=comments)
 
 
 if __name__ == "__main__":

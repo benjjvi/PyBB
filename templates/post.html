@@ -3,17 +3,40 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ post[2] }}</h1>
-<h2>{{ post[3] }}</h2>
+
+<div class="grid-container">
+    <div class="post">
+        <p class="nomargin posttitle">{{ post[2] }}</p>
+        <p class="nomargin postcontent">{{ post[3] }}</p>
+        <hr>
+        {{ "this is where the users optional decoration would go" }}
+        <p class="nomargin">Posted on {{ post[5] }} at {{ post[6] }}</p>
+    </div>
+
+    <div class="author">
+        <p class="nomargin username">{{ user[1] }}</p>
+        <p class="nomargin userabout">{{ user[4] }}</p>
+        <p class="nomargin userabout">{{ user[5] }}</p>
+    </div>
+</div>
+
+<hr>
 
 <h3>Comments</h3>
 
 {% for comment in comments %}
-<div class="comment"></div>
-    {# [(1, 1, 'This is a test comment.', 0, 20230610, 131108)] #} 
-    <h4>{{ comment[4] }}</h4>
-    <p>{{ comment[2] }}</p>
-    <p class="comment_info">Posted on {{ comment[5] }} at {{ comment[6] }}</p>
+<div class="grid-container">
+    <div class="commentcontent">
+        {{ comment[2] }}
+        <hr>
+        {{ "this is where the users optional decoration would go" }}
+        <p class="nomargin">Posted on {{ comment[5] }} at {{ comment[6] }}</p>
+    </div>
+
+    <div class="commentauthor">
+        {{ comment[4] }}
+    </div>
 </div>
+<hr>
 {% endfor %}
 {% endblock content %}
