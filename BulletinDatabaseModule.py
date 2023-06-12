@@ -13,6 +13,9 @@ class DB:
 
     def connect(self):
         return sqlite3.connect("db/bb.db3")
+    
+    def connect_logdb(self):
+        return sqlite3.connect("db/log.db3")
 
     def get_boards(self):
         db = self.connect()
@@ -134,9 +137,14 @@ class DB:
         # Close connection.
         db.close()
 
-    def create_board(self, boardid, boardtitle, boarddescription, boardicon):
+    def create_board(self, boardtitle, boarddescription, boardicon):
         db = self.connect()
         c = db.cursor()
+
+        # To get board ID, we want to be the next Id not in use in the boards table in the bb.db3 file.
+        c.execute("select count(*) from boards")
+        boardid = c.fetchone()[0] + 1
+
         c.execute(
             f"""insert into boards
                 values ({boardid}, '{boardtitle}', '{boarddescription}', '{boardicon}')"""
@@ -181,15 +189,15 @@ class DB:
         # Close connection.
         db.close()
 
-    def write_log(self, log_message):
+    def write_log(self, log_message, ipaddress):
         # Make entry.
-        db = self.connect()
+        db = self.connect_logdb()
         c = db.cursor()
 
         # Insert a row of data.
         c.execute(
             f"""insert into log
-                values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, '{log_message}')"""
+                values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, '{log_message}', '{ipaddress}')"""
         )
 
         # Save (commit) the changes.
@@ -237,6 +245,7 @@ class Configure:
 
         os.system("mkdir db")
         os.system("echo >> ./db/bb.db3")  # echo >> to be OS agnostic
+        os.system("echo >> ./db/log.db3")
         del os  # try and increase security in program. if os is only available for milliseconds during the setup process alone,
         #     security of program is massively increased
 
@@ -244,7 +253,7 @@ class Configure:
 
     def create_tables(self):
         for db in ["users", "log", "boards", "posts", "comments"]:
-            tmp_conn = sqlite3.connect("db/bb.db3")
+            tmp_conn = sqlite3.connect("db/bb.db3") if db != "log" else sqlite3.connect("db/log.db3")
 
             c = tmp_conn.cursor()
 
@@ -257,8 +266,8 @@ class Configure:
             elif db == "log":
                 c.execute(
                     f"""create table {db}
-                (date integer, time integer, log text)"""
-                )  # follow structure 20231231 as 31st Dec 2023. time as 23:59
+                (date integer, time integer, log text, ip text)"""
+                ) 
             elif db == "boards":
                 c.execute(
                     f"""create table {db}
@@ -284,7 +293,7 @@ class Configure:
 
     def fill_with_defaults(self):
         for db in ["users", "boards", "posts", "log", "comments"]:
-            tmp_conn = sqlite3.connect(f"db/bb.db3")
+            tmp_conn = sqlite3.connect(f"db/bb.db3") if db != "log" else sqlite3.connect("db/log.db3")
 
             c = tmp_conn.cursor()
             if db == "users":
@@ -296,7 +305,7 @@ class Configure:
             elif db == "log":
                 c.execute(
                     f"""insert into log
-                    values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, 'Created database files and populated them with tables.')"""
+                    values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, 'Created database files and populated them with tables.', "0.0.0.0")"""
                 )
             elif db == "boards":
                 c.execute(
@@ -325,14 +334,18 @@ class Configure:
 if __name__ == "__main__":
     c = Configure()
     db = DB(c.get_config())
-    db.write_log("Test log message.")
     print(db.get_boards())
     print(db.get_posts_from_board(1))
-    db.create_board(2, "Test", "Test board", "")
-    for i in range(0, 100):
-        db.create_post(2, f"Test post {i}", f"Test post content {i}", 0)
+    db.create_board("Pictures", "A picture sharing board, where you can upload links to your favourite photos you want to share with everyone!", "")
+    db.create_board("Videos", "A video sharing board, where you can upload links to your favourite videos you want to share with everyone!", "")
+    db.create_board("Documents", "A document sharing board, where you can upload links to your favourite documents you want to share with everyone!", "")
+    db.create_board("Memes", "A meme sharing board, where you can upload links to your favourite memes you want to share with everyone!", "")
+    
+    for k in range(1, 6):
+        for i in range(0, 100):
+            db.create_post(k, f"Test post {i}", f"Test post content {i}", 0)
 
-    for i in range(1, 101):
+    for i in range(1, 501):
         for j in range(0, 50):
             db.create_comment(i, f"Test comment {j}", 0, "admin")
     print(db.get_boards())

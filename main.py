@@ -7,14 +7,18 @@ app = Flask(__name__)
 Config = BulletinDatabaseModule.Configure()
 Database = BulletinDatabaseModule.DB(Config.get_config())
 
+# Note for logging:
+# To get the client's IP address, we use request.environ['REMOTE_ADDR'].
+# To log to the database, we use Database.write_log(f"{request.environ['REMOTE_ADDR']}").
 
 @app.route("/")
 def home():
     # Get the boards from the database:
     boards = Database.get_boards()
 
-    print(boards)
-    print(Config.get_config())
+    # Write to the log:
+    Database.write_log(f"Request to home page from {request.environ['REMOTE_ADDR']}.", request.environ['REMOTE_ADDR'])
+
     # Render the home page, with the boards:
     return render_template(
         "home.html",
@@ -25,6 +29,9 @@ def home():
 
 @app.route("/about")
 def about():
+    # Write to the log:
+    Database.write_log(f"Request to about page from {request.environ['REMOTE_ADDR']}.", f"{request.environ['REMOTE_ADDR']}")
+
     return render_template(
         "about.html",
         description=Config.get_config()["long_description"].split("<br>"),
@@ -64,29 +71,8 @@ def boardView():
     # Get the number of pages:
     numberOfPages = len(Database.get_posts_from_board(boardID)) // 15 + 1
 
-    # debugging
-    print(f"boardID: {boardID}")
-    print(f"pageID: {pageID}")
-    print(f"boardInfo: {boardInfo}")
-    print(f"posts: {posts}")
-    print(f"numberOfPages: {numberOfPages}")
-
-    print(f"Type of boardID: {type(boardID)}")
-    print(f"Type of pageID: {type(pageID)}")
-    print(f"Type of boardInfo: {type(boardInfo)}")
-    print(f"Type of posts: {type(posts)}")
-    print(f"Type of numberOfPages: {type(numberOfPages)}")
-
-    print(f"Type of index0 of boardInfo: {type(boardInfo[0])}")
-    print(f"Type of index0 of posts: {type(posts[0])}")
-
-    print(f"Length of boardInfo: {len(boardInfo)}")
-    print(f"Length of posts: {len(posts)}")
-
-    print("==============")
-    for post in posts:
-        print(post)
-    print("==============")
+    # Write to the log:
+    Database.write_log(f"Request to board page with id {boardID} and page with ID {pageID} from {request.environ['REMOTE_ADDR']}.", f"{request.environ['REMOTE_ADDR']}")
 
     return render_template(
         "board.html",
@@ -113,13 +99,6 @@ def postView():
     # Get the user information:
     userInfo = Database.get_user_info(postInfo[4])
 
-
-    # debugging
-    print(f"postID: {postID}")
-    print(f"postInfo: {postInfo}")
-    print(f"comments: {comments}")
-    print(f"userInfo: {userInfo}")
-
     # We need to turn postInfo from a tuple to a list.
     postInfo = list(postInfo)
 
@@ -137,6 +116,15 @@ def postView():
     for comment in comments:
         comment[6] = datetime.strptime(str(comment[6]), "%H%M%S").strftime("%H:%M UTC")
 
+    # We want to add a new index, 7, which will be the comment author's author profile.
+    # To do this, we can use get_user_info() from the database module, feeding in index 3 of the comment.
+    for comment in comments:
+        commentAuthorInfo = Database.get_user_info(comment[3])
+        commentAuthorInfo = list(commentAuthorInfo)
+        comment.append(commentAuthorInfo)
+
+    # Write to the log:
+    Database.write_log(f"Request to post page with id {postID} from {request.environ['REMOTE_ADDR']}.", f"{request.environ['REMOTE_ADDR']}")
 
     return render_template("post.html", user=userInfo, post=postInfo, comments=comments)
 
