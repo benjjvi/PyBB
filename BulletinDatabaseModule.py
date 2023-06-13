@@ -50,8 +50,6 @@ class DB:
     def get_user_id_from_username(self, username):
         db = self.connect()
         c = db.cursor()
-        print(type(username))
-        print(username)
         c.execute(f"select * from users")
 
         users = [list(t) for t in c.fetchall()]
@@ -152,7 +150,6 @@ class DB:
     def get_post_info(self, postid):
         db = self.connect()
         c = db.cursor()
-        print(str(postid))
         c.execute(f"select * from posts where postid = ? ", (str(postid),))
 
         post = c.fetchone()
