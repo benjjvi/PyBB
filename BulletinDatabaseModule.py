@@ -122,7 +122,7 @@ class DB:
                 count += 1
 
         # If the count of users with the username username is 0, log a warning using write_log and set returnval to [].
-        if count > 0:
+        if count > 1:
             self.write_log(f"WARN: Too many exist with the username {username} in table! Found {count} occurances.", "0.0.0.0")
             returnval = []
 
@@ -152,7 +152,8 @@ class DB:
     def get_post_info(self, postid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from posts where postid = ? ", str(postid))
+        print(str(postid))
+        c.execute(f"select * from posts where postid = ? ", (str(postid),))
 
         post = c.fetchone()
 
@@ -167,7 +168,7 @@ class DB:
     def get_comments_from_post(self, postid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from comments where postid = ? ", str(postid))
+        c.execute(f"select * from comments where postid = ? ", (str(postid), ))
 
         comments = c.fetchall()
 
