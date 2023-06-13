@@ -50,7 +50,7 @@ class DB:
     def get_user_info(self, userid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from users where userid = '{userid}'")
+        c.execute(f"select * from users where userid = ? ", userid)
 
         user = c.fetchone()
 
@@ -125,7 +125,8 @@ class DB:
 
         c.execute(
             f"""insert into comments
-                values ({postid}, {commentid}, '{commentcontent}', {commentauthorid}, '{commentauthorname}', {commentdate}, {commenttime})"""
+                values (?, ?, ?, ?, ?, ?, ?)""",
+                (postid, commentid, commentcontent, commentauthorid, commentauthorname, commentdate, commenttime)
         )
 
         # Save (commit) the changes.
@@ -147,7 +148,8 @@ class DB:
 
         c.execute(
             f"""insert into boards
-                values ({boardid}, '{boardtitle}', '{boarddescription}', '{boardicon}')"""
+                values (?, ?, ?, ?)""",
+                (boardid, boardtitle, boarddescription, boardicon)
         )
 
         # Save (commit) the changes.
@@ -177,7 +179,8 @@ class DB:
 
         c.execute(
             f"""insert into posts
-                values ({boardid}, {postid}, '{posttitle}', '{postcontent}', {postauthorid}, {postdate}, {posttime})"""
+                values (?, ?, ?, ?, ?, ?, ?)""",
+                (boardid, postid, posttitle, postcontent, postauthorid, postdate, posttime)
         )
 
         # Save (commit) the changes.
@@ -197,7 +200,8 @@ class DB:
         # Insert a row of data.
         c.execute(
             f"""insert into log
-                values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, '{log_message}', '{ipaddress}')"""
+                values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, ?, ?)""",
+                (log_message, ipaddress)
         )
 
         # Save (commit) the changes.
