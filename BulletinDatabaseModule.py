@@ -13,7 +13,7 @@ class DB:
 
     def connect(self):
         return sqlite3.connect("db/bb.db3")
-    
+
     def connect_logdb(self):
         return sqlite3.connect("db/log.db3")
 
@@ -35,7 +35,7 @@ class DB:
     def get_board_info(self, boardid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from boards where boardid = '{boardid}'")
+        c.execute(f"select * from boards where boardid = ?", boardid)
 
         board = c.fetchall()
 
@@ -46,7 +46,7 @@ class DB:
         db.close()
 
         return board
-    
+
     def get_user_info(self, userid):
         db = self.connect()
         c = db.cursor()
@@ -65,7 +65,7 @@ class DB:
     def get_posts_from_board(self, boardid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from posts where boardid = '{boardid}'")
+        c.execute(f"select * from posts where boardid = ? ", boardid)
 
         posts = c.fetchall()
 
@@ -80,7 +80,7 @@ class DB:
     def get_post_info(self, postid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from posts where postid = '{postid}'")
+        c.execute(f"select * from posts where postid = ? ", postid)
 
         post = c.fetchone()
 
@@ -95,7 +95,7 @@ class DB:
     def get_comments_from_post(self, postid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from comments where postid = '{postid}'")
+        c.execute(f"select * from comments where postid = ? ", postid)
 
         comments = c.fetchall()
 
@@ -197,7 +197,9 @@ class DB:
         # Insert a row of data.
         c.execute(
             f"""insert into log
-                values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, '{log_message}', '{ipaddress}')"""
+                values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, ?, ?)""",
+            log_message,
+            ipaddress,
         )
 
         # Save (commit) the changes.
@@ -253,7 +255,11 @@ class Configure:
 
     def create_tables(self):
         for db in ["users", "log", "boards", "posts", "comments"]:
-            tmp_conn = sqlite3.connect("db/bb.db3") if db != "log" else sqlite3.connect("db/log.db3")
+            tmp_conn = (
+                sqlite3.connect("db/bb.db3")
+                if db != "log"
+                else sqlite3.connect("db/log.db3")
+            )
 
             c = tmp_conn.cursor()
 
@@ -267,7 +273,7 @@ class Configure:
                 c.execute(
                     f"""create table {db}
                 (date integer, time integer, log text, ip text)"""
-                ) 
+                )
             elif db == "boards":
                 c.execute(
                     f"""create table {db}
@@ -293,7 +299,11 @@ class Configure:
 
     def fill_with_defaults(self):
         for db in ["users", "boards", "posts", "log", "comments"]:
-            tmp_conn = sqlite3.connect(f"db/bb.db3") if db != "log" else sqlite3.connect("db/log.db3")
+            tmp_conn = (
+                sqlite3.connect(f"db/bb.db3")
+                if db != "log"
+                else sqlite3.connect("db/log.db3")
+            )
 
             c = tmp_conn.cursor()
             if db == "users":
@@ -336,11 +346,27 @@ if __name__ == "__main__":
     db = DB(c.get_config())
     print(db.get_boards())
     print(db.get_posts_from_board(1))
-    db.create_board("Pictures", "A picture sharing board, where you can upload links to your favourite photos you want to share with everyone!", "")
-    db.create_board("Videos", "A video sharing board, where you can upload links to your favourite videos you want to share with everyone!", "")
-    db.create_board("Documents", "A document sharing board, where you can upload links to your favourite documents you want to share with everyone!", "")
-    db.create_board("Memes", "A meme sharing board, where you can upload links to your favourite memes you want to share with everyone!", "")
-    
+    db.create_board(
+        "Pictures",
+        "A picture sharing board, where you can upload links to your favourite photos you want to share with everyone!",
+        "",
+    )
+    db.create_board(
+        "Videos",
+        "A video sharing board, where you can upload links to your favourite videos you want to share with everyone!",
+        "",
+    )
+    db.create_board(
+        "Documents",
+        "A document sharing board, where you can upload links to your favourite documents you want to share with everyone!",
+        "",
+    )
+    db.create_board(
+        "Memes",
+        "A meme sharing board, where you can upload links to your favourite memes you want to share with everyone!",
+        "",
+    )
+
     for k in range(1, 6):
         for i in range(0, 100):
             db.create_post(k, f"Test post {i}", f"Test post content {i}", 0)
