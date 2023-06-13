@@ -1,0 +1,12 @@
+{# templates/register.html #}
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<form action="/createaccount" method="post">
+    <input type="text" name="email"></input>
+    <input type="submit" value="Signup"></input>
+</form>
+
+{% endblock content %}

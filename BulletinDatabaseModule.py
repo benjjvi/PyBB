@@ -197,9 +197,7 @@ class DB:
         # Insert a row of data.
         c.execute(
             f"""insert into log
-                values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, ?, ?)""",
-            log_message,
-            ipaddress,
+                values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, '{log_message}', '{ipaddress}')"""
         )
 
         # Save (commit) the changes.

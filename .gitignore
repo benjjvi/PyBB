@@ -6,3 +6,4 @@ db/*.db3
 playground.py
 test.html
 *.bak
+db/sessions

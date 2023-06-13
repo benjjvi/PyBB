@@ -27,6 +27,28 @@ nav .container section a {
     padding: 1em;
 }
 
+.header-grid {
+    display: grid;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    grid-template-columns: 80fr 20fr;
+    background-color: #eee;
+    padding: 10px;
+}
+
+.right-aligned {
+    text-align: right;
+}
+
+.header-grid > div {
+    background-color: #eee;
+    text-align: left;
+    /* The order of padding is top, left, bottom, right. */
+    padding: 10px 15px 10px 15px;
+}
+
 .banner {
     width: 94.95%;
     height: 200px;        

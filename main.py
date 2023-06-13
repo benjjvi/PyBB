@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request
 from datetime import datetime
 
+from flask import Flask, make_response, redirect, render_template, request
+
 import BulletinDatabaseModule
+import cryptography
 
 app = Flask(__name__)
 Config = BulletinDatabaseModule.Configure()
@@ -11,13 +13,32 @@ Database = BulletinDatabaseModule.DB(Config.get_config())
 # To get the client's IP address, we use request.environ['REMOTE_ADDR'].
 # To log to the database, we use Database.write_log(f"{request.environ['REMOTE_ADDR']}").
 
+
 @app.route("/")
 def home():
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        cryptography.lookup_session_token(session_token)
+        if session_token is not None
+        else None
+    )
+
     # Get the boards from the database:
     boards = Database.get_boards()
 
     # Write to the log:
-    Database.write_log(f"Request to home page from {request.environ['REMOTE_ADDR']}.", request.environ['REMOTE_ADDR'])
+    Database.write_log(
+        f"Request to home page from {request.environ['REMOTE_ADDR']} with user token {session_token}.",
+        request.environ["REMOTE_ADDR"],
+    )
+
+    # resp = make_response(render_template(
+    #     "home.html",
+    #     title=Config.get_config()["title"],
+    #     description=Config.get_config()["short_description"],
+    #     boards=boards,
+    # ))
+    # resp.set_cookie('userID', "test", max_age=2*60*60)
 
     # Render the home page, with the boards:
     return render_template(
@@ -25,21 +46,36 @@ def home():
         title=Config.get_config()["title"],
         description=Config.get_config()["short_description"],
         boards=boards,
+        username=loggedInUsername,
     )
+
 
 @app.route("/about")
 def about():
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        cryptography.lookup_session_token(session_token)
+        if session_token is not None
+        else None
+    )
+
     # Write to the log:
-    Database.write_log(f"Request to about page from {request.environ['REMOTE_ADDR']}.", f"{request.environ['REMOTE_ADDR']}")
+    Database.write_log(
+        f"Request to about page from {request.environ['REMOTE_ADDR']} with user token {session_token}.",
+        f"{request.environ['REMOTE_ADDR']}",
+    )
 
     return render_template(
         "about.html",
         description=Config.get_config()["long_description"].split("<br>"),
+        username=loggedInUsername,
     )
 
-@app.template_filter('date')
+
+@app.template_filter("date")
 def date_filter(s):
-    return datetime.utcnow().strftime('%Y')
+    return datetime.utcnow().strftime("%Y")
+
 
 # Using args
 
@@ -56,6 +92,13 @@ def date_filter(s):
 
 @app.route("/board")
 def boardView():
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        cryptography.lookup_session_token(session_token)
+        if session_token is not None
+        else None
+    )
+
     boardID = request.args.get("board", default=1, type=int)
     pageID = request.args.get("page", default=1, type=int)
 
@@ -72,7 +115,10 @@ def boardView():
     numberOfPages = len(Database.get_posts_from_board(boardID)) // 15 + 1
 
     # Write to the log:
-    Database.write_log(f"Request to board page with id {boardID} and page with ID {pageID} from {request.environ['REMOTE_ADDR']}.", f"{request.environ['REMOTE_ADDR']}")
+    Database.write_log(
+        f"Request to board page with id {boardID} and page with ID {pageID} from {request.environ['REMOTE_ADDR']} with user token {session_token}.",
+        f"{request.environ['REMOTE_ADDR']}",
+    )
 
     return render_template(
         "board.html",
@@ -82,11 +128,19 @@ def boardView():
         numberOfPages=numberOfPages,
         boardID=boardID,
         pageID=pageID,
+        username=loggedInUsername,
     )
 
 
 @app.route("/post")
 def postView():
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        cryptography.lookup_session_token(session_token)
+        if session_token is not None
+        else None
+    )
+
     # Get the post ID from the URL:
     postID = request.args.get("postid", default=1, type=int)
 
@@ -124,9 +178,40 @@ def postView():
         comment.append(commentAuthorInfo)
 
     # Write to the log:
-    Database.write_log(f"Request to post page with id {postID} from {request.environ['REMOTE_ADDR']}.", f"{request.environ['REMOTE_ADDR']}")
+    Database.write_log(
+        f"Request to post page with id {postID} from {request.environ['REMOTE_ADDR']} with user token {session_token}.",
+        f"{request.environ['REMOTE_ADDR']}",
+    )
 
-    return render_template("post.html", user=userInfo, post=postInfo, comments=comments)
+    return render_template(
+        "post.html",
+        user=userInfo,
+        post=postInfo,
+        comments=comments,
+        username=loggedInUsername,
+    )
+
+
+@app.route("/createaccount", methods=["POST"])
+def create_account():
+    email = request.form["email"]
+    print("The email address is '" + email + "'")
+    return redirect("/")
+
+
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+
+@app.route("/login")
+def login():
+    return redirect("/")
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    return redirect("/")
 
 
 if __name__ == "__main__":
