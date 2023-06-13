@@ -18,7 +18,7 @@ Database = BulletinDatabaseModule.DB(Config.get_config())
 def home():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        cryptography.lookup_session_token(session_token)
+        Database.get_username_from_user_id(cryptography.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -54,7 +54,7 @@ def home():
 def about():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        cryptography.lookup_session_token(session_token)
+        Database.get_username_from_user_id(cryptography.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -94,7 +94,7 @@ def date_filter(s):
 def boardView():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        cryptography.lookup_session_token(session_token)
+        Database.get_username_from_user_id(cryptography.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -136,7 +136,7 @@ def boardView():
 def postView():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        cryptography.lookup_session_token(session_token)
+        Database.get_username_from_user_id(cryptography.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -191,6 +191,70 @@ def postView():
         username=loggedInUsername,
     )
 
+@app.route("/loginuser", methods=["POST"])
+def loginuser():
+    # Get the username and password from the form:
+    username = request.form["username"]
+    password = request.form["password"]
+
+    # Get the session token, to check if it already exists:
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        Database.get_username_from_user_id(cryptography.lookup_session_token(session_token))
+        if session_token is not None
+        else None
+    )
+
+    # If the session token exists, we can redirect to the home page:
+    if loggedInUsername is not None:
+        return redirect("/")
+
+    # Check if the username and password are correct:
+    if len(Database.check_user_credentials(username, password)) != 0:
+        try:
+            # If they are, generate a session token:
+            uid = Database.get_user_id_from_username(username)
+
+            if uid == None:
+                raise Exception("User ID is None.")
+            else:
+                Database.write_log(f"INFO: User {username} logged in.", request.environ["REMOTE_ADDR"])
+                session_token = cryptography.create_session(uid)
+                # And set the cookie:
+                resp = make_response(redirect("/"))
+                resp.set_cookie("session_token", session_token)
+                return resp
+        except Exception:
+            # Write a log to the log.
+            Database.write_log(f"ERROR: User {username} tried logging in, but upon searching for userid, {Database.get_user_id_from_username(username)} was recieved.", request.environ["REMOTE_ADDR"])
+    else:
+        # If they aren't, redirect to the login page, with an error message passed through as error:
+        Database.write_log(f"WARN: User {username} tried logging in with password {password}, but the credentials were incorrect.", request.environ["REMOTE_ADDR"])
+        return render_template("login.html", username=loggedInUsername, error="Incorrect username or password.")
+
+
+@app.route("/login")
+def login():
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        Database.get_username_from_user_id(cryptography.lookup_session_token(session_token))
+        if session_token is not None
+        else None
+    )
+
+    if loggedInUsername is None: 
+        return render_template("login.html", username=loggedInUsername, error=None)
+    else:
+        return redirect("/")
+
+
+@app.route("/logout")
+def logout():
+    resp = make_response(redirect('/'))
+    resp.set_cookie('session_token', '', expires=0)
+    return resp
+
+
 
 @app.route("/createaccount", methods=["POST"])
 def create_account():
@@ -201,17 +265,16 @@ def create_account():
 
 @app.route("/register")
 def register():
-    return render_template("register.html")
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        Database.get_username_from_user_id(cryptography.lookup_session_token(session_token))
+        if session_token is not None
+        else None
+    )
+
+    return render_template("register.html", username=loggedInUsername)
 
 
-@app.route("/login")
-def login():
-    return redirect("/")
-
-
-@app.route("/logout", methods=["POST"])
-def logout():
-    return redirect("/")
 
 
 if __name__ == "__main__":

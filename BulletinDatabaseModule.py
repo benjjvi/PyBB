@@ -35,7 +35,7 @@ class DB:
     def get_board_info(self, boardid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from boards where boardid = ?", boardid)
+        c.execute(f"select * from boards where boardid = ?", str(boardid))
 
         board = c.fetchall()
 
@@ -46,11 +46,53 @@ class DB:
         db.close()
 
         return board
+    
+    def get_user_id_from_username(self, username):
+        db = self.connect()
+        c = db.cursor()
+        print(type(username))
+        print(username)
+        c.execute(f"select * from users")
+
+        users = [list(t) for t in c.fetchall()]
+
+        userid = None
+        for user in users:
+            if user[1] == username:
+                userid = user[0]
+
+        # Close cursor.
+        c.close()
+
+        # Close connection.
+        db.close()
+
+        return userid
+
+    def get_username_from_user_id(self, userid):
+        db = self.connect()
+        c = db.cursor()
+        c.execute(f"select * from users")
+
+        users = [list(t) for t in c.fetchall()]
+
+        username = None
+        for user in users:
+            if user[0] == int(userid):
+                username = user[1]
+
+        # Close cursor.
+        c.close()
+
+        # Close connection.
+        db.close()
+
+        return username
 
     def get_user_info(self, userid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from users where userid = ? ", userid)
+        c.execute(f"select * from users where userid = ? ", str(userid))
 
         user = c.fetchone()
 
@@ -61,11 +103,41 @@ class DB:
         db.close()
 
         return user
+    
+    def check_user_credentials(self, username, password):
+        # First, get all users from the database with the name username.
+        db = self.connect()
+        c = db.cursor()
+        c.execute("select * from users")
+
+        users = c.fetchall()
+
+        returnval = []
+        count = 0
+        # Now, check the users table for anyone with the username username.
+        for user in users:
+            # If the user's password matches the password given, return user.
+            if cryptography.check_password(password, user[2]):
+                returnval = user
+                count += 1
+
+        # If the count of users with the username username is 0, log a warning using write_log and set returnval to [].
+        if count > 0:
+            self.write_log(f"WARN: Too many exist with the username {username} in table! Found {count} occurances.", "0.0.0.0")
+            returnval = []
+
+        # Close cursor.
+        c.close()
+
+        # Close connection.
+        db.close()
+
+        return returnval
 
     def get_posts_from_board(self, boardid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from posts where boardid = ? ", boardid)
+        c.execute(f"select * from posts where boardid = ? ", str(boardid))
 
         posts = c.fetchall()
 
@@ -80,7 +152,7 @@ class DB:
     def get_post_info(self, postid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from posts where postid = ? ", postid)
+        c.execute(f"select * from posts where postid = ? ", str(postid))
 
         post = c.fetchone()
 
@@ -95,7 +167,7 @@ class DB:
     def get_comments_from_post(self, postid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from comments where postid = ? ", postid)
+        c.execute(f"select * from comments where postid = ? ", str(postid))
 
         comments = c.fetchall()
 
@@ -126,7 +198,15 @@ class DB:
         c.execute(
             f"""insert into comments
                 values (?, ?, ?, ?, ?, ?, ?)""",
-                (postid, commentid, commentcontent, commentauthorid, commentauthorname, commentdate, commenttime)
+            (
+                postid,
+                commentid,
+                commentcontent,
+                commentauthorid,
+                commentauthorname,
+                commentdate,
+                commenttime,
+            ),
         )
 
         # Save (commit) the changes.
@@ -149,7 +229,7 @@ class DB:
         c.execute(
             f"""insert into boards
                 values (?, ?, ?, ?)""",
-                (boardid, boardtitle, boarddescription, boardicon)
+            (boardid, boardtitle, boarddescription, boardicon),
         )
 
         # Save (commit) the changes.
@@ -180,7 +260,7 @@ class DB:
         c.execute(
             f"""insert into posts
                 values (?, ?, ?, ?, ?, ?, ?)""",
-                (boardid, postid, posttitle, postcontent, postauthorid, postdate, posttime)
+            (boardid, postid, posttitle, postcontent, postauthorid, postdate, posttime),
         )
 
         # Save (commit) the changes.
@@ -201,7 +281,7 @@ class DB:
         c.execute(
             f"""insert into log
                 values ({datetime.utcnow().strftime('%Y%m%d')}, {datetime.utcnow().strftime('%H%M%S')}, ?, ?)""",
-                (log_message, ipaddress)
+            (log_message, ipaddress),
         )
 
         # Save (commit) the changes.
