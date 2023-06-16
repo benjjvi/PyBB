@@ -4,6 +4,8 @@ from flask import Flask, make_response, redirect, render_template, request
 
 import BulletinDatabaseModule
 import cryptography
+import re
+import captcha_module
 
 app = Flask(__name__)
 Config = BulletinDatabaseModule.Configure()
@@ -13,6 +15,30 @@ Database = BulletinDatabaseModule.DB(Config.get_config())
 # To get the client's IP address, we use request.environ['REMOTE_ADDR'].
 # To log to the database, we use Database.write_log(f"{request.environ['REMOTE_ADDR']}").
 
+def generate_register(error):
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        Database.get_username_from_user_id(cryptography.lookup_session_token(session_token))
+        if session_token is not None
+        else None
+    )
+
+    if loggedInUsername != None:
+        return redirect("/")
+
+    # Get Captcha
+    captcha = captcha_module.create_audio_and_image_captcha()
+
+    captchaAnswer = captcha.split(":")[0]
+    captchaHash = captcha.split(":")[1]
+
+    audiocaptcha = f'captchas/{captchaAnswer}.wav'
+    imagecaptcha = f'captchas/{captchaAnswer}.png'
+
+    
+    resp = make_response(render_template("register.html", audiocaptcha=audiocaptcha, imagecaptcha=imagecaptcha, username=loggedInUsername, error=error))
+    resp.set_cookie("captcha", captchaHash)
+    return resp
 
 @app.route("/")
 def home():
@@ -258,9 +284,46 @@ def logout():
 
 @app.route("/createaccount", methods=["POST"])
 def create_account():
+    username = request.form["username"]
     email = request.form["email"]
-    print("The email address is '" + email + "'")
-    return redirect("/")
+    password = request.form["pwd"]
+    password_confirmed = request.form["pwd-confirm"]
+    captchaHash = request.cookies.get("captcha")
+    captchaResponse = request.form["captcha"]
+
+    # First, check the username is not already in database.
+    if Database.get_user_id_from_username(username) != None:
+        return generate_register("Username already exists.")
+    
+    # Next, check the email is not already in database.
+    if Database.get_user_id_from_email(email) != None:
+        return generate_register("Email already exists.")
+    
+    # Next, let's check if the email is in the xxx@xxx.xxx format using regex.
+    if re.match(r"[^@]+@[^@]+\.[^@]+", email) == None:
+        return generate_register("Email is not in the correct format.")
+    
+    # Next, check the passwords match.
+    if password != password_confirmed:
+        return generate_register("Passwords do not match.")
+    
+    # Next, check password is at least 8 characters long with at least one number, one letter, and one special character.
+    if re.match(r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$", password) == None:
+        return generate_register("Password is not in the correct format. You must have at least 8 characters, of which having one number, one letter, and one special character.")
+    
+    # Next, check the captcha is correct.
+    if captcha_module.check_captcha(captchaHash, captchaResponse) == False:
+        return generate_register("Captcha is incorrect.")
+    
+    # If all of these checks pass, we can create the account.
+    # To do this, we can use the create_user() function from the database module.
+    # This function takes in the username, email, and password, and returns the user ID.
+    # We can then use this user ID to create a session token, and set the cookie.
+    uid = Database.create_user(username, email, password)
+    session_token = cryptography.create_session(uid)
+    resp = make_response(redirect("/"))
+    resp.set_cookie("session_token", session_token)
+    return resp
 
 
 @app.route("/register")
@@ -272,7 +335,22 @@ def register():
         else None
     )
 
-    return render_template("register.html", username=loggedInUsername)
+    if loggedInUsername != None:
+        return redirect("/")
+
+    # Get Captcha
+    captcha = captcha_module.create_audio_and_image_captcha()
+
+    captchaAnswer = captcha.split(":")[0]
+    captchaHash = captcha.split(":")[1]
+
+    audiocaptcha = f'captchas/{captchaAnswer}.wav'
+    imagecaptcha = f'captchas/{captchaAnswer}.png'
+
+    
+    resp = make_response(render_template("register.html", audiocaptcha=audiocaptcha, imagecaptcha=imagecaptcha, username=loggedInUsername, error=None))
+    resp.set_cookie("captcha", captchaHash)
+    return resp
 
 
 

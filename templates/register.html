@@ -5,8 +5,28 @@
 {% block content %}
 
 <form action="/createaccount" method="post">
-    <input type="text" name="email"></input>
+    Username: <input type="text" name="username"></input><br>
+
+    E-mail: <input type="text" name="email"></input><br>
+
+    Password: <input type="password" name="pwd"></input><br>
+
+    Confirm Password: <input type="password" name="pwd-confirm"></input><br>
+    <br>
+
+    Please answer the captcha below:<br>
+    <img src="{{ url_for('static', filename=imagecaptcha) }}" alt="Image captcha. If you cannot read this, please use the audio captcha, which is directly below this."><br>
+    <audio controls>
+        <source src="{{ url_for('static', filename=audiocaptcha) }}" type="audio/wave">
+        Your browser does not support WAVE audio. Please use the image captcha.
+    </audio><br>
+    Captcha: <input type="text" name="captcha"></input><br>
+    
     <input type="submit" value="Signup"></input>
 </form>
+
+{% if error != None %}
+    <p style="color: red;">{{ error }}</p>
+{% endif %}
 
 {% endblock content %}

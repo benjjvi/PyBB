@@ -66,6 +66,60 @@ class DB:
         db.close()
 
         return userid
+    
+    def get_user_id_from_email(self, email):
+        db = self.connect()
+        c = db.cursor()
+        c.execute(f"select * from users")
+
+        users = [list(t) for t in c.fetchall()]
+
+        userid = None
+        for user in users:
+            if user[3] == email:
+                userid = user[0]
+
+        # Close cursor.
+        c.close()
+
+        # Close connection.
+        db.close()
+
+        return userid
+    
+    def create_user(self, username, email, password):
+        db = self.connect()
+        c = db.cursor()
+
+        # To get user ID, we want to be the next Id not in use in the users table in the bb.db3 file.
+        c.execute("select count(*) from users")
+        userid = c.fetchone()[0] # We start with UID 0, so we don't need to add 1.
+
+        c.execute(
+            f"""insert into users
+                values (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                userid,
+                username,
+                cryptography.get_hashed_password(password).decode("utf-8"),
+                email,
+                "",
+                "",
+                datetime.utcnow().strftime("%Y%m%d"),
+                0,
+            ),
+        )
+
+        # Save (commit) the changes.
+        db.commit()
+
+        # Close cursor.
+        c.close()
+
+        # Close connection.
+        db.close()
+
+        return userid
 
     def get_username_from_user_id(self, userid):
         db = self.connect()
@@ -326,6 +380,7 @@ class Configure:
         import os
 
         os.system("mkdir db")
+        os.system("mkdir static/captchas")
         os.system("echo >> ./db/bb.db3")  # echo >> to be OS agnostic
         os.system("echo >> ./db/log.db3")
         del os  # try and increase security in program. if os is only available for milliseconds during the setup process alone,

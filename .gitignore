@@ -2,9 +2,10 @@ __pycache__
 test.py
 pybb.conf
 .DS_Store
-db/*.db3
+db/*
 playground.py
 test.html
 *.bak
 db/sessions
 *.db3-journal
+static/captchas/*
