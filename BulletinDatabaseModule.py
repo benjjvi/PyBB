@@ -357,6 +357,7 @@ class Configure:
             f = open("pybb.conf", "r")
             conf = f.read()
             self.conf = ast.literal_eval(conf)
+            self.conf = self.conf["app"]
             f.close()
         except Exception as e:
             print(e)

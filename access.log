@@ -1,0 +1,4 @@
+192.168.1.70 - - [17/Jun/2023:16:40:33 +0100] "GET / HTTP/1.1" 200 1206 "https://192.168.1.70:5001/register" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15"
+192.168.1.70 - - [17/Jun/2023:16:40:33 +0100] "GET /static/style.css HTTP/1.1" 304 0 "https://192.168.1.70:5001/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15"
+192.168.1.70 - - [17/Jun/2023:16:40:33 +0100] "GET /static/images/banner.jpg HTTP/1.1" 304 0 "https://192.168.1.70:5001/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15"
+192.168.1.70 - - [17/Jun/2023:16:40:33 +0100] "GET /static/NunitoSans.ttf HTTP/1.1" 304 0 "https://192.168.1.70:5001/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15"
