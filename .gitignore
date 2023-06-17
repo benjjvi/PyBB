@@ -11,3 +11,4 @@ db/sessions
 static/captchas/*
 debug.sh
 *.pem
+access.log
