@@ -1,7 +1,10 @@
+import random
+
 from captcha.audio import AudioCaptcha
 from captcha.image import ImageCaptcha
-import random
-import cryptography
+
+import bbcrypto
+
 
 def create_audio_and_image_captcha():
     # Create a random string of 5 characters:
@@ -10,18 +13,18 @@ def create_audio_and_image_captcha():
         captchaString += random.choice("abcdefghijklmnopqrstuvwxyz0123456789")
 
     # Initialise the audio and image captcha devices:
-    audio = AudioCaptcha(voicedir='./captcha_voice/en')
-    image = ImageCaptcha(fonts=['./static/NunitoSans.ttf'])
+    audio = AudioCaptcha(voicedir="./captcha_voice/en")
+    image = ImageCaptcha(fonts=["./static/NunitoSans.ttf"])
 
     # Write the captcha to the files corresponding with their names:
-    audio.write(captchaString, f'./static/captchas/{captchaString}.wav')
-    image.write(captchaString, f'./static/captchas/{captchaString}.png')
+    audio.write(captchaString, f"./static/captchas/{captchaString}.wav")
+    image.write(captchaString, f"./static/captchas/{captchaString}.png")
 
     # Make a token for the captcha, by storing the captcha string in a file with the format:
     # captcha:hashed_caption
 
     # Create the token:
-    token = f"{captchaString}:{cryptography.get_hashed_password(captchaString).decode('utf-8')}"
+    token = f"{captchaString}:{bbcrypto.get_hashed_password(captchaString).decode('utf-8')}"
 
     # Write the token to the file:
     with open("./db/captchas", "a") as f:
@@ -29,6 +32,7 @@ def create_audio_and_image_captcha():
 
     # Return the token:
     return token
+
 
 def check_captcha(captchaHashed, captchaResponse):
     # Get all captchas from the captcha file.
@@ -57,5 +61,5 @@ def check_captcha(captchaHashed, captchaResponse):
             if captchaResponse == captchaComponents[0]:
                 # Return True if it does:
                 returnval = True
-    
+
     return returnval

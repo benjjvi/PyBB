@@ -14,8 +14,8 @@ Taking a look at the configuration file can be a bit daunting, especially with s
 
 ### Step 3: Running your server!
 - TODO: run.sh uses the insecure built in flask run app. We need to promote this to a proper WGSI interface. DO NOT deploy this bulletin board under any circumstances.
-- TODO: Ports cannot be modified. The program will always run on port 5000.
-- TODO: HTTPS certificates are not yet supported.
+- TODO: Ports cannot be modified. The program will always run on port 5001.
+- TODO: HTTPS certificates are not yet supported (they might be, but we don't actually know...).
 
 Congratulations. After this short setup, you're ready to get your server started.
-Just pop on over to your web browser, and input the IP of the machine you are connecting to (or DNS domain, if the server has been port-forwarded properly), as well as the port (which is not needed if you are using the default HTTP port with http://, or the default HTTPS port with https://). 
+Just pop on over to your web browser, and input the IP of the machine you are connecting to (or DNS domain, if the server has been port-forwarded properly), as well as the port (which is not needed if you are using the default HTTP port 80 with http://, or the default HTTPS port 443 with https://). 

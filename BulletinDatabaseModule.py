@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
 
-import cryptography
+import bbcrypto
 
 # SQLite3 supports TEXT, INTEGER, REAL, BLOB and NULL only by default.
 # https://www.sqlite.org/datatype3.html
@@ -46,7 +46,7 @@ class DB:
         db.close()
 
         return board
-    
+
     def get_user_id_from_username(self, username):
         db = self.connect()
         c = db.cursor()
@@ -66,7 +66,7 @@ class DB:
         db.close()
 
         return userid
-    
+
     def get_user_id_from_email(self, email):
         db = self.connect()
         c = db.cursor()
@@ -86,14 +86,14 @@ class DB:
         db.close()
 
         return userid
-    
+
     def create_user(self, username, email, password):
         db = self.connect()
         c = db.cursor()
 
         # To get user ID, we want to be the next Id not in use in the users table in the bb.db3 file.
         c.execute("select count(*) from users")
-        userid = c.fetchone()[0] # We start with UID 0, so we don't need to add 1.
+        userid = c.fetchone()[0]  # We start with UID 0, so we don't need to add 1.
 
         c.execute(
             f"""insert into users
@@ -101,7 +101,7 @@ class DB:
             (
                 userid,
                 username,
-                cryptography.get_hashed_password(password).decode("utf-8"),
+                bbcrypto.get_hashed_password(password).decode("utf-8"),
                 email,
                 "",
                 "",
@@ -155,7 +155,7 @@ class DB:
         db.close()
 
         return user
-    
+
     def check_user_credentials(self, username, password):
         # First, get all users from the database with the name username.
         db = self.connect()
@@ -169,13 +169,16 @@ class DB:
         # Now, check the users table for anyone with the username username.
         for user in users:
             # If the user's password matches the password given, return user.
-            if cryptography.check_password(password, user[2]):
+            if bbcrypto.check_password(password, user[2]):
                 returnval = user
                 count += 1
 
         # If the count of users with the username username is 0, log a warning using write_log and set returnval to [].
         if count > 1:
-            self.write_log(f"WARN: Too many exist with the username {username} in table! Found {count} occurances.", "0.0.0.0")
+            self.write_log(
+                f"WARN: Too many exist with the username {username} in table! Found {count} occurances.",
+                "0.0.0.0",
+            )
             returnval = []
 
         # Close cursor.
@@ -219,7 +222,7 @@ class DB:
     def get_comments_from_post(self, postid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from comments where postid = ? ", (str(postid), ))
+        c.execute(f"select * from comments where postid = ? ", (str(postid),))
 
         comments = c.fetchall()
 
@@ -445,7 +448,7 @@ class Configure:
                 # Create table
                 c.execute(
                     f"""insert into users
-                    values (0, 'admin', '{cryptography.get_hashed_password('admin').decode('utf-8')}', 'admin@pybb.net', "About Line 1", "About Line 2", {datetime.utcnow().strftime('%Y%m%d')}, 1)"""
+                    values (0, 'admin', '{bbcrypto.get_hashed_password('admin').decode('utf-8')}', 'admin@pybb.net', "About Line 1", "About Line 2", {datetime.utcnow().strftime('%Y%m%d')}, 1)"""
                 )
             elif db == "log":
                 c.execute(

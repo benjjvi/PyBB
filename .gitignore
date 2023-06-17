@@ -9,3 +9,4 @@ test.html
 db/sessions
 *.db3-journal
 static/captchas/*
+debug.sh
