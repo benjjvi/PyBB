@@ -24,7 +24,9 @@ def create_audio_and_image_captcha():
     # captcha:hashed_caption
 
     # Create the token:
-    token = f"{captchaString}:{bbcrypto.get_hashed_password(captchaString).decode('utf-8')}"
+    token = (
+        f"{captchaString}:{bbcrypto.get_hashed_password(captchaString).decode('utf-8')}"
+    )
 
     # Write the token to the file:
     with open("./db/captchas", "a") as f:

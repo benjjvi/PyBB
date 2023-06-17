@@ -3,9 +3,9 @@ from datetime import datetime
 
 from flask import Flask, make_response, redirect, render_template, request
 
+import bbcrypto
 import BulletinDatabaseModule
 import captcha_module
-import bbcrypto
 
 app = Flask(__name__)
 Config = BulletinDatabaseModule.Configure()
@@ -19,9 +19,7 @@ Database = BulletinDatabaseModule.DB(Config.get_config())
 def generate_register(error):
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        Database.get_username_from_user_id(
-            bbcrypto.lookup_session_token(session_token)
-        )
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -55,9 +53,7 @@ def generate_register(error):
 def home():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        Database.get_username_from_user_id(
-            bbcrypto.lookup_session_token(session_token)
-        )
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -93,9 +89,7 @@ def home():
 def about():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        Database.get_username_from_user_id(
-            bbcrypto.lookup_session_token(session_token)
-        )
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -135,9 +129,7 @@ def date_filter(s):
 def boardView():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        Database.get_username_from_user_id(
-            bbcrypto.lookup_session_token(session_token)
-        )
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -179,9 +171,7 @@ def boardView():
 def postView():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        Database.get_username_from_user_id(
-            bbcrypto.lookup_session_token(session_token)
-        )
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -246,9 +236,7 @@ def loginuser():
     # Get the session token, to check if it already exists:
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        Database.get_username_from_user_id(
-            bbcrypto.lookup_session_token(session_token)
-        )
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -297,9 +285,7 @@ def loginuser():
 def login():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        Database.get_username_from_user_id(
-            bbcrypto.lookup_session_token(session_token)
-        )
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -372,9 +358,7 @@ def create_account():
 def register():
     session_token = request.cookies.get("session_token")
     loggedInUsername = (
-        Database.get_username_from_user_id(
-            bbcrypto.lookup_session_token(session_token)
-        )
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
         if session_token is not None
         else None
     )
@@ -405,4 +389,4 @@ def register():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, ssl_context='adhoc')
+    app.run(debug=True, ssl_context="adhoc")
