@@ -15,6 +15,7 @@
                 <section>
                     <!-- If username passed through function isn't none, we are logged in via cookie sessions. -->
                     {% if username != None %}
+                        <a class="right-aligned" href="{{ url_for('postcreation') }}">Create Post</a>
                         <a class="right-aligned" href="{{ url_for('logout') }}">Logout {{ username }}</a>
                     {% else %}
                         <a class="right-aligned" href="{{ url_for('login') }}">Login</a>

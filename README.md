@@ -2,6 +2,11 @@
 
 An open source bulletin board, designed to run on the lowest end hardware.
 
+## To Do List
+1. Add the ability to customise the bulletin board.
+2. Add an administration page.
+3. General tidy up.
+
 ## Getting started with an example database.
 ### Step 1: Creating the database.
 PyBB comes with an "example" database mode, that can be found by running "reset.sh" in a terminal. This will create the file "bb.db3" in the "db" folder. Feel free to poke around with a SQLite viewer, and take a look at the tables and values.

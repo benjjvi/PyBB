@@ -3,7 +3,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Welcome to {{ title }}!</h1>
+<h1>Welcome to the {{ title }} bulletin board!</h1>
+{% if title == "default Jinja and Flask" %}
+    <h2 style="color: red;">Do not deploy this server! Read the <a href="{{ url_for('static', filename='docs/docs.html')}}">docs</a> on how to configure.</h2>
+{% endif %}
 <h2>{{ description }}</h2>
 
 {% for board in boards %}

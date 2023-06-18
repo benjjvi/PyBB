@@ -97,7 +97,7 @@ class DB:
 
         c.execute(
             f"""insert into users
-                values (?, ?, ?, ?, ?, ?, ?, ?)""",
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 userid,
                 username,
@@ -106,6 +106,7 @@ class DB:
                 "",
                 "",
                 datetime.utcnow().strftime("%Y%m%d"),
+                0,
                 0,
             ),
         )
@@ -144,7 +145,7 @@ class DB:
     def get_user_info(self, userid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from users where userid = ? ", str(userid))
+        c.execute(f"select * from users where userid = ? ", (str(userid), ))
 
         user = c.fetchone()
 
@@ -327,6 +328,8 @@ class DB:
         # Close connection.
         db.close()
 
+        return postid
+
     def write_log(self, log_message, ipaddress):
         # Make entry.
         db = self.connect_logdb()
@@ -406,7 +409,7 @@ class Configure:
                 # Create table
                 c.execute(
                     f"""create table {db}
-                (userid integer, username text, hashedpassword text, email text, userabout1 string, userabout2 string, datejoined integer, locked integer)"""
+                (userid integer, username text, hashedpassword text, email text, userabout1 string, userabout2 string, datejoined integer, locked integer, confirmedemail integer)"""
                 )
             elif db == "log":
                 c.execute(
@@ -449,7 +452,7 @@ class Configure:
                 # Create table
                 c.execute(
                     f"""insert into users
-                    values (0, 'admin', '{bbcrypto.get_hashed_password('admin').decode('utf-8')}', 'admin@pybb.net', "About Line 1", "About Line 2", {datetime.utcnow().strftime('%Y%m%d')}, 1)"""
+                    values (0, 'admin', '{bbcrypto.get_hashed_password('admin').decode('utf-8')}', 'admin@pybb.net', "About Line 1", "About Line 2", {datetime.utcnow().strftime('%Y%m%d')}, 1, 0)"""
                 )
             elif db == "log":
                 c.execute(

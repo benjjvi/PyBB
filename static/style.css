@@ -33,7 +33,7 @@ nav .container section a {
     -moz-hyphens: auto;
     -ms-hyphens: auto;
     hyphens: auto;
-    grid-template-columns: 80fr 20fr;
+    grid-template-columns: 75fr 25fr;
     background-color: #eee;
     padding: 10px;
 }

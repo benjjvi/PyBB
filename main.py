@@ -76,6 +76,7 @@ def home():
     # resp.set_cookie('userID', "test", max_age=2*60*60)
 
     # Render the home page, with the boards:
+    print(Config.get_config()["title"])
     return render_template(
         "home.html",
         title=Config.get_config()["title"],
@@ -196,6 +197,7 @@ def postView():
 
     # We can handle turning the date from &Y&M&d in the postInfo[5] into a &d &M &Y format here.
     # We can also handle turning the date from &Y&M&d in the comments[5] into a &d &M &Y format here.
+    print(postInfo)
     postInfo[5] = datetime.strptime(str(postInfo[5]), "%Y%m%d").strftime("%d %B %Y")
     for comment in comments:
         comment[5] = datetime.strptime(str(comment[5]), "%Y%m%d").strftime("%d %B %Y")
@@ -226,6 +228,74 @@ def postView():
         username=loggedInUsername,
     )
 
+@app.route("/postcreation")
+def postcreation():
+    # This page is used to create a post.
+    # We need to get the board ID from the URL, and validate it exists in the database.
+    boardID = request.args.get("board", default=1, type=int)
+    boardInfo = Database.get_board_info(boardID)
+
+    # Get the boards from the database:
+    boards = Database.get_boards()
+    # Output looks like:
+    # [(1, 'General', 'General discussion', ''), (2, 'Pictures', 'A picture sharing board, where you can upload links to your favourite photos you want to share with everyone!', ''), (3, 'Videos', 'A video sharing board, where you can upload links to your favourite videos you want to share with everyone!', ''), (4, 'Documents', 'A document sharing board, where you can upload links to your favourite documents you want to share with everyone!', ''), (5, 'Memes', 'A meme sharing board, where you can upload links to your favourite memes you want to share with everyone!', '')]
+    # Strip this down to a list of lists where each list is [boardID, boardName].
+    boards = [[board[0], board[1]] for board in boards]
+    print(boards)
+
+    # Get the session token, to check if it already exists:
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
+        if session_token is not None
+        else None
+    )
+
+    # If the session token does not exists, we need to redirect to the home page:
+    if loggedInUsername is None:
+        return redirect("/")
+    else:
+        # If it does, we can render the post creation page:
+        return render_template(
+            "createpost.html",
+            boardInfo=boardInfo,
+            boards=boards,
+            username=loggedInUsername,
+        )
+
+@app.route("/createpost", methods=["POST"])
+def createpost():
+    # Get the contents of fields title and content from the form:
+    title = request.form["title"]
+    content = request.form["content"]
+    boardID = request.form["boardID"]
+
+    # urls is a regex that finds all URLs and their pages. e.g youtube.com/page/page2 is one entire URL. url's dont need to have a https:// at the beginning. 
+    urls = re.findall(r"(?:(?:https?|http):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+", content)
+    for url in urls:
+        print(url)
+        content = content.replace(url, f"<a href='{url}'>{url}</a>")
+
+    # Get the session token, to check if it already exists:
+    session_token = request.cookies.get("session_token")
+    loggedInUsername = (
+        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
+        if session_token is not None
+        else None
+    )
+
+    # If the session token does not exists, we need to redirect to the home page:
+    if loggedInUsername is None:
+        return redirect("/")
+    else:
+        # If it does, we can create the post:
+        # To do this, we can use the create_post() function from the database module.
+        # This function takes in the title, content, and board ID, and returns the post ID.
+        uid = Database.get_user_id_from_username(loggedInUsername)
+        pid = Database.create_post(boardID, title, content, uid)
+
+        # And redirect to the post page:
+        return redirect(f"/post?postid={pid}")
 
 @app.route("/loginuser", methods=["POST"])
 def loginuser():

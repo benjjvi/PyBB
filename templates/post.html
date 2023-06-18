@@ -7,9 +7,9 @@
 <div class="grid-container">
     <div class="post">
         <p class="nomargin posttitle">{{ post[2] }}</p>
-        <p class="nomargin postcontent">{{ post[3] }}</p>
+        <p class="nomargin postcontent">{{ post[3]|safe }}</p>
         <hr>
-        {{ "this is where the users optional decoration would go" }}
+        {{ "this is where the users optional decoration would go"|safe }}
         <p class="nomargin">Posted on {{ post[5] }} at {{ post[6] }}</p>
     </div>
 
@@ -27,9 +27,9 @@
 {% for comment in comments %}
 <div class="grid-container">
     <div class="commentcontent">
-        {{ comment[2] }}
+        {{ comment[2]|safe }}
         <hr>
-        {{ "this is where the users optional decoration would go" }}
+        {{ "this is where the users optional decoration would go"|safe }}
         <p class="nomargin">Posted on {{ comment[5] }} at {{ comment[6] }}</p>
     </div>
 
