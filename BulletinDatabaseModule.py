@@ -145,7 +145,7 @@ class DB:
     def get_user_info(self, userid):
         db = self.connect()
         c = db.cursor()
-        c.execute(f"select * from users where userid = ? ", (str(userid), ))
+        c.execute(f"select * from users where userid = ? ", (str(userid),))
 
         user = c.fetchone()
 

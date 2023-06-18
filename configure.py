@@ -153,6 +153,7 @@ with open("pybb.conf", "w") as f:
     f.write(str(data))
 
 import os
+
 os.system("mkdir db")
 os.system("mkdir static/captchas")
 

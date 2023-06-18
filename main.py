@@ -228,6 +228,7 @@ def postView():
         username=loggedInUsername,
     )
 
+
 @app.route("/postcreation")
 def postcreation():
     # This page is used to create a post.
@@ -263,6 +264,7 @@ def postcreation():
             username=loggedInUsername,
         )
 
+
 @app.route("/createpost", methods=["POST"])
 def createpost():
     # Get the contents of fields title and content from the form:
@@ -270,11 +272,15 @@ def createpost():
     content = request.form["content"]
     boardID = request.form["boardID"]
 
-    # urls is a regex that finds all URLs and their pages. e.g youtube.com/page/page2 is one entire URL. url's dont need to have a https:// at the beginning. 
+    # urls is a regex that finds all URLs and their pages. e.g youtube.com/page/page2 is one entire URL. url's dont need to have a https:// at the beginning.
     urls = re.findall(r"(?:(?:https?|http):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+", content)
     for url in urls:
         print(url)
-        content = content.replace(url, f"<a href='{url}'>{url}</a>")
+        content = (
+            content.replace(url, f"<a href='https://{url}'>{url}</a>")
+            if url[:8] != "https://" and url[:7] != "http://"
+            else f"<a href='{url}'>{url}</a>"
+        )
 
     # Get the session token, to check if it already exists:
     session_token = request.cookies.get("session_token")
@@ -296,6 +302,7 @@ def createpost():
 
         # And redirect to the post page:
         return redirect(f"/post?postid={pid}")
+
 
 @app.route("/loginuser", methods=["POST"])
 def loginuser():
