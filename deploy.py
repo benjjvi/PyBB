@@ -1,15 +1,3 @@
-# gunicorn --certfile=server.crt --keyfile=server.key --bind 0.0.0.0:443 main:app
-
-x = {
-    "host": "0.0.0.0",
-    "port": 5001,
-    "use-https": 1,
-    "https": {
-        "certfile": "./cert.cer",
-        "keyfile": "./cert.key",
-    },
-}
-
 import ast
 import os
 
