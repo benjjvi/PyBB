@@ -1,8 +1,6 @@
 import re
 from datetime import datetime
-
 from html import escape
-
 
 from flask import Flask, make_response, redirect, render_template, request
 
