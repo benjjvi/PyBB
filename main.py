@@ -1,7 +1,8 @@
 import re
 from datetime import datetime
 
-import html
+from html import escape
+
 
 from flask import Flask, make_response, redirect, render_template, request
 
@@ -274,9 +275,7 @@ def createpost():
     content = request.form["content"]
     boardID = request.form["boardID"]
 
-    # Before looking at a regex to find URLs, we need to unescape the HTML submitted. This could be HTML that is malicious, so we need to escape it.
-    # We can do this by using the html.unescape() function.
-    content = html.unescape(content)
+    content = escape(content)
 
     # urls is a regex that finds all URLs and their pages. e.g youtube.com/page/page2 is one entire URL. url's dont need to have a https:// at the beginning.
     urls = re.findall(r"(?:(?:https?|http):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+", content)
@@ -286,25 +285,6 @@ def createpost():
             if url[:8] != "https://" and url[:7] != "http://"
             else f"<a href='{url}'>{url}</a>"
         )
-
-    # Because we unescape the HTML, we need to escape the tags that could cause XSS attacks.
-    # These tags are <script>, <iframe>, and and any hrefs that begin with ANYTHING other than https://, http://, or follow a domain pattern.
-    # We can do this by using the re.sub() function.
-    content = re.sub(r"<script>", "&lt;script&gt;", content)
-    content = re.sub(r"<\/script>", "&lt;/script&gt;", content)
-    content = re.sub(r"<iframe>", "&lt;iframe&gt;", content)
-    content = re.sub(r"<\/iframe>", "&lt;/iframe&gt;", content)
-
-    # Next, we need to escape any hrefs that begin with ANYTHING other than https://, http://, or follow a domain pattern.
-    # We can do this by using the re.sub() function.
-    # The regex that detects anything that doesnt start with https://, http://. or follow xxx.xx is as follows:
-    # (?:(?:https?|http):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+
-    # We want the user to be able to see the URL, just not make it clickable, so remove the <a> tags.
-    content = re.sub(r"<a href='(?:(?:https?|http):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+'>(?:(?:https?|http):\/\/)?[\w/\-?=%.]+\.[\w/\-&?=%.]+<\/a>", r"\g<0>".replace("<a href='", "").replace("'>", ""), content)
-
-    # The final regex we need will turn <a href=javascript:alert(1)>xss</a> into <a>xss</a>, where anything can be after javascript.
-    # We can do this by using the re.sub() function.
-    content = re.sub(r"<a href=javascript:.*>(.*)<\/a>", r"<a>\g<1></a>", content)
 
     # Get the session token, to check if it already exists:
     session_token = request.cookies.get("session_token")
