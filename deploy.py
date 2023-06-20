@@ -9,6 +9,12 @@ try:
 except Exception:
     exit("Error: pybb.conf not found")
 
+# Check the databases exist.
+if not os.path.exists("db/bb.db3"):
+    exit("Error: db/bb.db3 not found")
+if not os.path.exists("db/log.db3"):
+    exit("Error: db/log.db3 not found")
+
 # Get variables
 host = conf["host"]
 port = conf["port"]
