@@ -12,17 +12,15 @@ app = Flask(__name__)
 Config = BulletinDatabaseModule.Configure()
 Database = BulletinDatabaseModule.DB(Config.get_config())
 
-# Note for logging:
-# To get the client's IP address, we use request.environ['REMOTE_ADDR'].
-# To log to the database, we use Database.write_log(f"{request.environ['REMOTE_ADDR']}").
-
 
 def generate_register(error):
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     if loggedInUsername != None:
@@ -52,11 +50,15 @@ def generate_register(error):
 
 @app.route("/")
 def home():
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    print(request.cookies.get("session_token"))
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    print(type(session_token))
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     # Get the boards from the database:
@@ -77,7 +79,6 @@ def home():
     # resp.set_cookie('userID', "test", max_age=2*60*60)
 
     # Render the home page, with the boards:
-    print(Config.get_config()["title"])
     return render_template(
         "home.html",
         title=Config.get_config()["title"],
@@ -89,11 +90,13 @@ def home():
 
 @app.route("/about")
 def about():
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     # Write to the log:
@@ -129,11 +132,13 @@ def date_filter(s):
 
 @app.route("/board")
 def boardView():
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     boardID = request.args.get("board", default=1, type=int)
@@ -171,11 +176,13 @@ def boardView():
 
 @app.route("/post")
 def postView():
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     # Get the post ID from the URL:
@@ -198,7 +205,6 @@ def postView():
 
     # We can handle turning the date from &Y&M&d in the postInfo[5] into a &d &M &Y format here.
     # We can also handle turning the date from &Y&M&d in the comments[5] into a &d &M &Y format here.
-    print(postInfo)
     postInfo[5] = datetime.strptime(str(postInfo[5]), "%Y%m%d").strftime("%d %B %Y")
     for comment in comments:
         comment[5] = datetime.strptime(str(comment[5]), "%Y%m%d").strftime("%d %B %Y")
@@ -230,6 +236,11 @@ def postView():
     )
 
 
+@app.route("/submitcomment", methods=["POST"])
+def submitcomment():
+    return redirect("/")
+
+
 @app.route("/postcreation")
 def postcreation():
     # This page is used to create a post.
@@ -243,14 +254,15 @@ def postcreation():
     # [(1, 'General', 'General discussion', ''), (2, 'Pictures', 'A picture sharing board, where you can upload links to your favourite photos you want to share with everyone!', ''), (3, 'Videos', 'A video sharing board, where you can upload links to your favourite videos you want to share with everyone!', ''), (4, 'Documents', 'A document sharing board, where you can upload links to your favourite documents you want to share with everyone!', ''), (5, 'Memes', 'A meme sharing board, where you can upload links to your favourite memes you want to share with everyone!', '')]
     # Strip this down to a list of lists where each list is [boardID, boardName].
     boards = [[board[0], board[1]] for board in boards]
-    print(boards)
 
     # Get the session token, to check if it already exists:
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     # If the session token does not exists, we need to redirect to the home page:
@@ -285,11 +297,13 @@ def createpost():
         )
 
     # Get the session token, to check if it already exists:
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     # If the session token does not exists, we need to redirect to the home page:
@@ -313,11 +327,13 @@ def loginuser():
     password = request.form["password"]
 
     # Get the session token, to check if it already exists:
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     # If the session token exists, we can redirect to the home page:
@@ -336,11 +352,24 @@ def loginuser():
                 Database.write_log(
                     f"INFO: User {username} logged in.", request.environ["REMOTE_ADDR"]
                 )
-                session_token = bbcrypto.create_session(uid)
-                # And set the cookie:
-                resp = make_response(redirect("/"))
-                resp.set_cookie("session_token", session_token)
-                return resp
+
+                # If the user is a locked account, refuse to log them in.
+                if Database.get_user_info(uid)[7] == 1:
+                    Database.write_log(
+                        f"WARN: User {username} tried to log in, but account is locked.",
+                        request.environ["REMOTE_ADDR"],
+                    )
+                    return render_template(
+                        "login.html",
+                        username=loggedInUsername,
+                        error="Your account is locked. Please contact an administrator.",
+                    )
+                else:
+                    session_token = bbcrypto.create_session(uid)
+                    # And set the cookie:
+                    resp = make_response(redirect("/"))
+                    resp.set_cookie("session_token", session_token)
+                    return resp
         except Exception:
             # Write a log to the log.
             Database.write_log(
@@ -362,11 +391,13 @@ def loginuser():
 
 @app.route("/login")
 def login():
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     if loggedInUsername is None:
@@ -435,11 +466,13 @@ def create_account():
 
 @app.route("/register")
 def register():
-    session_token = request.cookies.get("session_token")
-    loggedInUsername = (
-        Database.get_username_from_user_id(bbcrypto.lookup_session_token(session_token))
-        if session_token is not None
-        else None
+    session_token = (
+        request.cookies.get("session_token")
+        if request.cookies.get("session_token") is not None
+        else 0
+    )
+    loggedInUsername = Database.get_username_from_user_id(
+        bbcrypto.lookup_session_token(session_token)
     )
 
     if loggedInUsername != None:
