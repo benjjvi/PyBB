@@ -129,6 +129,11 @@ class DB:
 
         users = [list(t) for t in c.fetchall()]
 
+        try:
+            userid = int(userid)
+        except Exception:
+            return None
+
         username = None
         for user in users:
             if user[0] == int(userid):

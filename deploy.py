@@ -1,15 +1,3 @@
-# gunicorn --certfile=server.crt --keyfile=server.key --bind 0.0.0.0:443 main:app
-
-x = {
-    "host": "0.0.0.0",
-    "port": 5001,
-    "use-https": 1,
-    "https": {
-        "certfile": "./cert.cer",
-        "keyfile": "./cert.key",
-    },
-}
-
 import ast
 import os
 
@@ -20,6 +8,12 @@ try:
         conf = ast.literal_eval(f.read())["wsgi"]
 except Exception:
     exit("Error: pybb.conf not found")
+
+# Check the databases exist.
+if not os.path.exists("db/bb.db3"):
+    exit("Error: db/bb.db3 not found")
+if not os.path.exists("db/log.db3"):
+    exit("Error: db/log.db3 not found")
 
 # Get variables
 host = conf["host"]
